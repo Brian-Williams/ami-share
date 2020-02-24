@@ -1,0 +1,26 @@
+name: 'aws-ami-share'
+description: 'Share amis'
+inputs:
+  ami-config:
+    description: 'Path to the config file'
+  plan:
+    description: 'Path to output file for plan'
+    default: 'play.yaml'
+  no-dry-run:
+    description: "Dry run is the default false behaviour, set to true to follow through with the action"
+    default: 'false'
+  share-snapshots:
+    description: "Whether to share snapshots attached to AMIs"
+    default: 'false'
+
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ami-share
+    - --config=${{ inputs.ami-config }}
+    - --plan=${{ inputs.plan }}
+    - --no-dry-run=${{ inputs.no-dry-run }}
+    - --share-snapshots=${{ inputs.share-snapshots }}
+    - --verbose
