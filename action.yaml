@@ -24,3 +24,7 @@ runs:
     - --no-dry-run=${{ inputs.no-dry-run }}
     - --share-snapshots=${{ inputs.share-snapshots }}
     - --verbose
+    
+branding:
+  icon: anchor
+  color: gray-dark
