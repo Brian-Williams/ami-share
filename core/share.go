@@ -157,13 +157,13 @@ func (shareAMI *AWSShareAMI) Run() error {
 							break
 						}
 						shareMetaTags := map[string]string{fmt.Sprintf("%s-%s", ShareWithPrefix, account.Alias): "1"}
-						err = ami.AddTags(shareMetaTags, shareAMI.ShareParams.ShareSnapshots)
+						err = MapTag(ami, shareMetaTags, shareAMI.ShareParams.ShareSnapshots)
 						if err != nil {
 							shareAMI.logger.Errorf("Failed to add meta post-share tags to AMI [%s] in account: [%s]. Error: %s", ami.String(), account.ID, err)
 						}
 
 						if len(config.SourceAccount.PostShareTags) > 0 {
-							err = ami.AddTags(config.SourceAccount.PostShareTags, true)
+							err = MapTag(ami, config.SourceAccount.PostShareTags, true)
 							if err != nil {
 								shareAMI.logger.Errorf("Failed to add post-share tags to AMI [%s] in account: [%s]. Error: %s", ami.String(), account.ID, err)
 							}

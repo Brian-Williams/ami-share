@@ -3,6 +3,7 @@ description: 'Share amis'
 inputs:
   ami-config:
     description: 'Path to the config file'
+    required: true
   plan:
     description: 'Path to output file for plan'
     default: 'play.yaml'

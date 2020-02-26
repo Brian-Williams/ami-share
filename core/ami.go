@@ -160,14 +160,41 @@ func (e *EC2Image) Match(filter common.Filter) bool {
 	return resourceValue == filter.Value
 }
 
+
+// Deprecated: AddTags has been replaced with `MapTag`. Also consider using `Tag` and `TagSnapshot` directly if you have
+// any use for []*ec2.Tag
+// AddTags adds tags to an image and optionally it's snapshots
 func (e *EC2Image) AddTags(tags map[string]string, tagSnapshots bool) error {
-	var awsTags []*ec2.Tag
-	for key, value := range tags {
-		awsTags = append(awsTags, &ec2.Tag{
-			Key:   aws.String(key),
-			Value: aws.String(value),
+	return MapTag(e, tags, tagSnapshots)
+}
+
+func MapTag(image common.Image, tags map[string]string, tagSnapshots bool) error {
+	awsTags := mapToTags(tags)
+	err := image.Tag(awsTags)
+	if err != nil {
+		return err
+	}
+	if tagSnapshots {
+		err := image.TagSnapshot(awsTags)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func mapToTags(tags map[string]string) (t []*ec2.Tag) {
+	for k, v := range tags {
+		t = append(t, &ec2.Tag{
+			Key: aws.String(k),
+			Value: aws.String(v),
 		})
 	}
+	return
+}
+
+// Tag tags an ami
+func (e *EC2Image) Tag(tags []*ec2.Tag) error {
 	_, err := e.svc.CreateTags(&ec2.CreateTagsInput{
 		Resources: []*string{
 			aws.String(e.id),
@@ -177,21 +204,21 @@ func (e *EC2Image) AddTags(tags map[string]string, tagSnapshots bool) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
 
-	if tagSnapshots {
-		for _, snapshotId := range e.snapshots {
-			_, err := e.svc.CreateTags(&ec2.CreateTagsInput{
-				Resources: []*string{
-					aws.String(snapshotId),
-				},
-				Tags: awsTags,
-			})
-			if err != nil {
-				return err
-			}
+func (e *EC2Image) TagSnapshot(tags []*ec2.Tag) error {
+	for _, snapshotId := range e.snapshots {
+		_, err := e.svc.CreateTags(&ec2.CreateTagsInput{
+			Resources: []*string{
+				aws.String(snapshotId),
+			},
+			Tags: tags,
+		})
+		if err != nil {
+			return err
 		}
 	}
-
 	return nil
 }
 

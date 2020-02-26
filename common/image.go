@@ -5,6 +5,7 @@ import (
 	"github.com/rebuy-de/aws-nuke/pkg/types"
 	"sort"
 	"time"
+	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
 type Image interface {
@@ -13,7 +14,10 @@ type Image interface {
 	String() string
 
 	Match(Filter) bool
-	AddTags(map[string]string, bool) error
+	// AddTags replaced with `MapTag`
+	//AddTags(map[string]string, bool) error
+	Tag([]*ec2.Tag) error
+	TagSnapshot([]*ec2.Tag) error
 	ShareWithAccount(string, bool) error
 	CopyTags(*session.Session, bool) error
 	MarshalYAML() (interface{}, error)
